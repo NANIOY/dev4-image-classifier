@@ -7,30 +7,33 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0;
+    gap: 1.5rem;
 }
 
 h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+}
+
+.header__model--status {
+    font-size: 1rem;
     text-align: center;
 }
 
 video {
     border-radius: 4px;
-    overflow: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 .result {
     font-size: 1.5rem;
-    margin-bottom: 2rem;
     text-align: center;
 }
 
 .captureButton {
     display: block;
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
     padding: 16px 40px;
     font-size: 16px;
     text-transform: uppercase;
@@ -46,4 +49,23 @@ video {
 
 .captureButton:hover {
     background-color: rgb(74, 30, 206);
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+#capturedImage {
+    width: 80%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+#capturedImage img {
+    border-radius: 4px;
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
