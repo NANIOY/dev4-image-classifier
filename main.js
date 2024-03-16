@@ -78,7 +78,7 @@ async function captureAndClassify() {
 function displayResults(results) {
   resultElement.innerHTML = results
     .filter(result => result.confidence >= 0.1)
-    .map(result => `<h2>${result.label}</h2>`)
+    .map(result => `<p>${result.label}</p>`)
     .join('');
 }
 
