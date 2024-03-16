@@ -78,8 +78,13 @@ async function captureAndClassify() {
       const highestConfidenceResult = results.reduce((prev, current) => {
         return (prev.confidence > current.confidence) ? prev : current;
       });
+
+      // Trim down the result label
+      const trimmedResult = highestConfidenceResult.label.split(',')[0].trim();
+
+      // Create a paragraph element for the trimmed result
       const resultParagraph = document.createElement('p');
-      resultParagraph.textContent = highestConfidenceResult.label;
+      resultParagraph.textContent = trimmedResult;
       resultContainer.appendChild(resultParagraph);
 
       cardDiv.appendChild(imageContainer);
