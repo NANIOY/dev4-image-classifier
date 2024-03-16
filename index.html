@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Classifier</title>
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="normalize.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <div class="header">
+    <h1 class="header__title">Image Classifier</h1>
+    <p class="header__model--status">Loading model...</p>
+  </div>
+
+  <video id="webcam" autoplay playsinline width="640" height="480"></video>
+  <button class="captureButton" disabled>Capture Photo</button>
+  <canvas id="canvas" class="canvas"></canvas>
+  <h2>Classification Result:</h2>
+  <p class="result"></p>
+
+  <script src="main.js"></script>
+</body>
+
+</html>

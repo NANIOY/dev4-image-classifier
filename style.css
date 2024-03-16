@@ -1,0 +1,22 @@
+/* Style for header */
+.header {
+    margin-bottom: 20px;
+}
+
+.header__title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header__model-status {
+    font-style: italic;
+}
+
+/* Style for video feed and capture button */
+.video-element {
+    margin-bottom: 10px;
+}
+
+.capture-button {
+    margin-bottom: 20px;
+}
