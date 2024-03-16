@@ -63,9 +63,24 @@ h2 {
     margin-bottom: 2rem;
 }
 
-#capturedImage img {
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #252525;
+    padding: 1rem;
     border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.image-container img {
     max-width: 100%;
     height: auto;
-    display: block;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.result-container p {
+    font-size: 1.2rem;
+    margin: 0.2rem 0;
 }

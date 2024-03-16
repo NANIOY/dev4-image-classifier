@@ -53,21 +53,35 @@ async function captureAndClassify() {
 
       console.log('Captured picture:', blob);
 
-      let imageContainer = document.getElementById('capturedImage');
-      if (!imageContainer) {
-        imageContainer = document.createElement('div');
-        imageContainer.id = 'capturedImage';
-        document.body.appendChild(imageContainer);
-      }
-
       const imageURL = URL.createObjectURL(blob);
       const imgElement = document.createElement('img');
       imgElement.src = imageURL;
+
+      const cardDiv = document.createElement('div');
+      cardDiv.classList.add('card');
+
+      const imageContainer = document.createElement('div');
+      imageContainer.classList.add('image-container');
       imageContainer.appendChild(imgElement);
+
+      const resultContainer = document.createElement('div');
+      resultContainer.classList.add('result-container');
 
       const results = await classifier.classify(canvas);
       console.log('Classification Results:', results);
-      displayResults(results);
+      results
+        .filter(result => result.confidence >= 0.1)
+        .forEach(result => {
+          const resultParagraph = document.createElement('p');
+          resultParagraph.textContent = result.label;
+          resultContainer.appendChild(resultParagraph);
+        });
+
+      cardDiv.appendChild(imageContainer);
+      cardDiv.appendChild(resultContainer);
+
+      const capturedImageContainer = document.getElementById('capturedImage');
+      capturedImageContainer.appendChild(cardDiv);
     }, 'image/jpeg');
   } catch (error) {
     console.error("Error processing image:", error);
