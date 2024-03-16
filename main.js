@@ -41,7 +41,8 @@ async function captureAndClassify() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  context.scale(-1, 1); // flip horizontally
+  context.drawImage(video, 0, 0, canvas.width * -1, canvas.height);
 
   try {
     canvas.toBlob(async function (blob) {
