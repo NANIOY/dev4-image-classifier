@@ -6,66 +6,17 @@ const resultElement = document.querySelector('.result');
 const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
 let classifier;
 
-
-// capture photo
-function capturePhoto() {
-  const picture = webcam.snap();
-  
-  if (picture) {
-    const imageData = dataURItoBlob(picture);
-    console.log('Image data:', imageData);
-    classifyImage(imageData);
-  } else {
-    console.error("No input image provided.");
-  }
-}
-
-// convert data URI to blob
-function dataURItoBlob(dataURI) {
-  const byteString = atob(dataURI.split(',')[1]);
-  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeString });
-}
-
-// classify image
-function classifyImage(imageData) {
-    const video = document.createElement('video');
-    video.src = URL.createObjectURL(imageData);
-  
-    video.onloadedmetadata = () => {
-        classifier.classify(video, (err, results) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            resultElement.innerHTML = "";
-            for (result of results) {
-                if (result.confidence >= 0.1) {
-                    resultElement.innerHTML += `<h2>${result.label}</h2>`;
-                }
-            }
-        });
-    };
-}
-
 // setup
-function setup() {
-  classifier = ml5.imageClassifier('MobileNet', modelLoaded);
+async function setup() {
+  try {
+    classifier = await ml5.imageClassifier('MobileNet');
+    console.log('Model Loaded!');
+    document.querySelector(".header__model--status").innerHTML = "Model loaded. You can now capture a picture.";
+    captureButton.removeAttribute('disabled');
+  } catch (error) {
+    console.error("Failed to load model:", error);
+  }
 }
-
-// model load
-function modelLoaded() {
-  console.log('Model Loaded!');
-  document.querySelector(".header__model--status").innerHTML = "Model loaded. You can now capture a picture.";
-  captureButton.removeAttribute('disabled');
-}
-
-captureButton.addEventListener('click', capturePhoto);
 
 // start webcam
 webcam.start()
@@ -74,3 +25,60 @@ webcam.start()
     setup();
   })
   .catch(err => console.error("Webcam start error:", err));
+
+// capture photo and classify
+async function captureAndClassify() {
+  const video = webcamElement;
+
+  if (!video.srcObject) {
+    console.error("No video stream available.");
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  try {
+    canvas.toBlob(async function (blob) {
+      if (!blob) {
+        console.error("Failed to capture image as blob.");
+        return;
+      }
+
+      console.log('Captured picture:', blob);
+
+      let imageContainer = document.getElementById('capturedImage');
+      if (!imageContainer) {
+        imageContainer = document.createElement('div');
+        imageContainer.id = 'capturedImage';
+        document.body.appendChild(imageContainer);
+      }
+
+      const imageURL = URL.createObjectURL(blob);
+      const imgElement = document.createElement('img');
+      imgElement.src = imageURL;
+      imageContainer.appendChild(imgElement);
+
+      const results = await classifier.classify(canvas);
+      console.log('Classification Results:', results);
+      displayResults(results);
+    }, 'image/jpeg');
+  } catch (error) {
+    console.error("Error processing image:", error);
+  }
+}
+
+// display results
+function displayResults(results) {
+  resultElement.innerHTML = results
+    .filter(result => result.confidence >= 0.1)
+    .map(result => `<h2>${result.label}</h2>`)
+    .join('');
+}
+
+captureButton.addEventListener('click', captureAndClassify);
