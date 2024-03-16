@@ -31,6 +31,11 @@ video {
     text-align: center;
 }
 
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
 .captureButton {
     display: block;
     margin-top: 0.5rem;

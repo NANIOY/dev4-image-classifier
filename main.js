@@ -11,17 +11,17 @@ async function setup() {
   try {
     // load the model
     classifier = await ml5.imageClassifier('MobileNet');
-    console.log('Model Loaded!');
-
-    // update status
-    document.querySelector(".header__model--status").innerHTML = "Model loaded. You can now capture a picture.";
 
     // enable capture button
-    captureButton.removeAttribute('disabled');
+    captureButton.classList.remove('disabled');
+    captureButton.textContent = "Capture Photo";
   } catch (error) {
     console.error("Failed to load model:", error);
   }
 }
+
+captureButton.classList.add('disabled');
+captureButton.textContent = "Model loading...";
 
 // start webcam
 webcam.start()
