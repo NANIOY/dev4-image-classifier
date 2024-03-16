@@ -2,7 +2,6 @@ const webcamElement = document.getElementById('webcam');
 const canvasElement = document.getElementById('canvas');
 const snapSoundElement = document.getElementById('snapSound');
 const captureButton = document.querySelector('.captureButton');
-const resultElement = document.querySelector('.result');
 const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
 let classifier;
 
@@ -70,20 +69,18 @@ async function captureAndClassify() {
       imageContainer.classList.add('image-container');
       imageContainer.appendChild(imgElement);
 
-      // create container for classification results
+      // create container for classification result
       const resultContainer = document.createElement('div');
       resultContainer.classList.add('result-container');
 
-      // display results
+      // display only the highest confidence result
       const results = await classifier.classify(canvas);
-      console.log('Classification Results:', results);
-      results
-        .filter(result => result.confidence >= 0.1)
-        .forEach(result => {
-          const resultParagraph = document.createElement('p');
-          resultParagraph.textContent = result.label;
-          resultContainer.appendChild(resultParagraph);
-        });
+      const highestConfidenceResult = results.reduce((prev, current) => {
+        return (prev.confidence > current.confidence) ? prev : current;
+      });
+      const resultParagraph = document.createElement('p');
+      resultParagraph.textContent = highestConfidenceResult.label;
+      resultContainer.appendChild(resultParagraph);
 
       cardDiv.appendChild(imageContainer);
       cardDiv.appendChild(resultContainer);
@@ -95,14 +92,6 @@ async function captureAndClassify() {
   } catch (error) {
     console.error("Error processing image:", error);
   }
-}
-
-// display results
-function displayResults(results) {
-  resultElement.innerHTML = results
-    .filter(result => result.confidence >= 0.1)
-    .map(result => `<p>${result.label}</p>`)
-    .join('');
 }
 
 captureButton.addEventListener('click', captureAndClassify);
