@@ -10,24 +10,47 @@ let classifier;
 // capture photo
 function capturePhoto() {
   const picture = webcam.snap();
-  classifyImage(picture);
+  
+  if (picture) {
+    const imageData = dataURItoBlob(picture);
+    console.log('Image data:', imageData);
+    classifyImage(imageData);
+  } else {
+    console.error("No input image provided.");
+  }
+}
+
+// convert data URI to blob
+function dataURItoBlob(dataURI) {
+  const byteString = atob(dataURI.split(',')[1]);
+  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
 }
 
 // classify image
 function classifyImage(imageData) {
-  classifier.classify(imageData, (err, results) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    // Display the classification results
-    resultElement.innerHTML = "";
-    for (result of results) {
-      if (result.confidence >= 0.1) {
-        resultElement.innerHTML += `<h2>${result.label}</h2>`;
-      }
-    }
-  });
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(imageData);
+  
+    video.onloadedmetadata = () => {
+        classifier.classify(video, (err, results) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            resultElement.innerHTML = "";
+            for (result of results) {
+                if (result.confidence >= 0.1) {
+                    resultElement.innerHTML += `<h2>${result.label}</h2>`;
+                }
+            }
+        });
+    };
 }
 
 // setup
