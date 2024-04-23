@@ -13,6 +13,7 @@ async function setup() {
 
     // enable capture button
     captureButton.classList.remove('disabled');
+    captureButton.removeAttribute('disabled');
     captureButton.textContent = "Capture Photo";
   } catch (error) {
     console.error("Failed to load model:", error);
