@@ -2,53 +2,30 @@ let webcamElement = document.getElementById('webcam');
 let captureButton = document.querySelector('.captureButton');
 let switchCameraButton = document.getElementById('switchCameraButton');
 let facingMode = 'user';
-let webcam;
-let model;
+let webcam = new Webcam(webcamElement, facingMode);
+let classifier;
 
-if (typeof Webcam === 'undefined') {
-  class Webcam {
-    constructor(webcamElement, facingMode) {
-      this.webcamElement = webcamElement;
-      this.facingMode = facingMode;
-      this.stream = null;
-    }
+async function setup() {
+  try {
+    // load mobilenet model
+    classifier = await mobilenet.load();
 
-    async start() {
-      const constraints = {
-        video: {
-          facingMode: this.facingMode
-        }
-      };
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.webcamElement.srcObject = this.stream;
-      return new Promise((resolve) => {
-        this.webcamElement.onloadedmetadata = () => {
-          resolve();
-        };
-      });
-    }
-
-    async stop() {
-      if (this.stream) {
-        this.stream.getTracks().forEach(track => track.stop());
-        this.stream = null;
-      }
-    }
+    // enable capture button
+    captureButton.classList.remove('disabled');
+    captureButton.removeAttribute('disabled');
+    captureButton.textContent = "Capture Photo";
+  } catch (error) {
+    console.error("Failed to load model:", error);
   }
 }
 
-async function initializeWebcam(facingMode) {
+captureButton.classList.add('disabled');
+captureButton.textContent = "Model loading...";
+
+async function startWebcam(facingMode) {
   try {
-    if (webcam) {
+    if (webcam.stream) {
       await webcam.stop();
-      webcamElement.remove();
-      webcamElement = document.createElement('video');
-      webcamElement.setAttribute('id', 'webcam');
-      webcamElement.setAttribute('autoplay', 'true');
-      webcamElement.setAttribute('playsinline', 'true');
-      webcamElement.setAttribute('width', '640');
-      webcamElement.setAttribute('height', '480');
-      document.body.insertBefore(webcamElement, document.body.childNodes[2]);
     }
     webcam = new Webcam(webcamElement, facingMode);
     await webcam.start();
@@ -58,22 +35,7 @@ async function initializeWebcam(facingMode) {
   }
 }
 
-async function setup() {
-  try {
-    model = await cocoSsd.load();
-    captureButton.classList.remove('disabled');
-    captureButton.removeAttribute('disabled');
-    captureButton.textContent = "Capture Photo";
-    console.log("Model loaded successfully");
-  } catch (error) {
-    console.error("Failed to load model:", error);
-  }
-}
-
-captureButton.classList.add('disabled');
-captureButton.textContent = "Model loading...";
-
-initializeWebcam(facingMode).then(setup);
+startWebcam(facingMode).then(setup);
 
 async function captureAndClassify() {
   let video = webcamElement;
@@ -82,8 +44,7 @@ async function captureAndClassify() {
     return;
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
+  // capture image from webcam
   let canvas = document.createElement('canvas');
   let context = canvas.getContext('2d');
   canvas.width = video.videoWidth;
@@ -91,39 +52,42 @@ async function captureAndClassify() {
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   try {
-    let predictions = await model.detect(canvas);
-
-    if (predictions.length === 0) {
-      alert("No objects detected.");
-      return;
-    }
-
+    // classify image using mobilenet model and get predictions
+    let predictions = await classifier.classify(canvas);
     let highestConfidenceResult = predictions.reduce((prev, current) => {
       return (prev.score > current.score) ? prev : current;
     });
 
-    let trimmedResult = highestConfidenceResult.class;
+    // trim down result to remove extra information
+    let trimmedResult = highestConfidenceResult.className.split(',')[0].trim();
 
+    // create p element for displaying prediction result
     let resultParagraph = document.createElement('p');
     resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.score.toFixed(4)}`;
 
+    // create image element for captured image
     let imgElement = new Image();
     imgElement.src = canvas.toDataURL('image/jpeg');
 
+    // create card element for captured image and result
     let cardDiv = document.createElement('div');
     cardDiv.classList.add('card');
 
+    // create image container and result container
     let imageContainer = document.createElement('div');
     imageContainer.classList.add('image-container');
     imageContainer.appendChild(imgElement);
 
+    // create result container
     let resultContainer = document.createElement('div');
     resultContainer.classList.add('result-container');
     resultContainer.appendChild(resultParagraph);
 
+    // append image and result container to card
     cardDiv.appendChild(imageContainer);
     cardDiv.appendChild(resultContainer);
 
+    // append card to captured image container
     let capturedImageContainer = document.getElementById('capturedImage');
     capturedImageContainer.appendChild(cardDiv);
 
@@ -135,7 +99,7 @@ async function captureAndClassify() {
 
 captureButton.addEventListener('click', captureAndClassify);
 
-switchCameraButton.addEventListener('click', async () => {
+switchCameraButton.addEventListener('click', () => {
   facingMode = (facingMode === 'user') ? 'environment' : 'user';
-  await initializeWebcam(facingMode);
+  startWebcam(facingMode);
 });
