@@ -54,16 +54,29 @@ async function captureAndClassify() {
   try {
     // classify image using mobilenet model and get predictions
     let predictions = await classifier.classify(canvas);
+
+    console.log('Predictions:', predictions);
+
+    if (!predictions || predictions.length === 0) {
+      throw new Error("No predictions received from the model.");
+    }
+
     let highestConfidenceResult = predictions.reduce((prev, current) => {
-      return (prev.score > current.score) ? prev : current;
+      return (prev.probability > current.probability) ? prev : current;
     });
+
+    console.log('Highest Confidence Result:', highestConfidenceResult);
+
+    if (!highestConfidenceResult || !highestConfidenceResult.className || !highestConfidenceResult.probability) {
+      throw new Error("Invalid prediction result received.");
+    }
 
     // trim down result to remove extra information
     let trimmedResult = highestConfidenceResult.className.split(',')[0].trim();
 
     // create p element for displaying prediction result
     let resultParagraph = document.createElement('p');
-    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.score.toFixed(4)}`;
+    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.probability.toFixed(4)}`;
 
     // create image element for captured image
     let imgElement = new Image();
