@@ -2,7 +2,7 @@ let webcamElement = document.getElementById('webcam');
 let captureButton = document.querySelector('.captureButton');
 let switchCameraButton = document.getElementById('switchCameraButton');
 let facingMode = 'user';
-let webcam = new Webcam(webcamElement, 'user');
+let webcam = new Webcam(webcamElement, facingMode);
 let classifier;
 
 async function setup() {
@@ -22,14 +22,21 @@ async function setup() {
 captureButton.classList.add('disabled');
 captureButton.textContent = "Model loading...";
 
-webcam.start()
-  .then(result => {
-    console.log("Webcam started:", result);
-    setup();
-  })
-  .catch(err => console.error("Webcam start error:", err));
+async function startWebcam(facingMode) {
+  try {
+    if (webcam.stream) {
+      await webcam.stop();
+    }
+    webcam = new Webcam(webcamElement, facingMode);
+    await webcam.start();
+    console.log(`Webcam started with facing mode: ${facingMode}`);
+  } catch (error) {
+    console.error("Webcam start error:", error);
+  }
+}
 
-// capture and classify image
+startWebcam(facingMode).then(setup);
+
 async function captureAndClassify() {
   let video = webcamElement;
   if (!video.srcObject) {
@@ -92,7 +99,5 @@ captureButton.addEventListener('click', captureAndClassify);
 
 switchCameraButton.addEventListener('click', () => {
   facingMode = (facingMode === 'user') ? 'environment' : 'user';
-  webcam.stop();
-  webcam = new Webcam(webcamElement, facingMode);
-  webcam.start();
+  startWebcam(facingMode);
 });
