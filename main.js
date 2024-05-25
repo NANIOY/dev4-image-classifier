@@ -73,10 +73,21 @@ async function captureAndClassify() {
 
     // trim down result to remove extra information
     let trimmedResult = highestConfidenceResult.className.split(',')[0].trim();
+    let probabilityPercentage = (highestConfidenceResult.probability * 100).toFixed(2);
 
     // create p element for displaying prediction result
     let resultParagraph = document.createElement('p');
-    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.probability.toFixed(4)}`;
+    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${probabilityPercentage}%`;
+
+    // color code result based on confidence level
+    if (highestConfidenceResult.probability < 0.4) {
+      resultParagraph.style.color = 'red';
+      let warningIcon = document.createElement('span');
+      warningIcon.textContent = ' ⚠️';
+      resultParagraph.appendChild(warningIcon);
+    } else if (highestConfidenceResult.probability < 0.6) {
+      resultParagraph.style.color = 'orange';
+    }
 
     // create image element for captured image
     let imgElement = new Image();
