@@ -56,6 +56,7 @@ video {
     left: 50%;
     transform: translateX(-50%);
     z-index: 999;
+    white-space: nowrap;
 }
 
 .captureButton:hover {
@@ -95,8 +96,4 @@ h2 {
 .result-container p {
     font-size: 1.2rem;
     margin: 0.2rem 0;
-}
-
-#webcam {
-    transform: scaleX(-1);
 }
