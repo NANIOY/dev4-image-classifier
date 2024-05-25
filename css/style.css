@@ -32,6 +32,31 @@ video {
     height: auto;
 }
 
+.webcam-container {
+    position: relative;
+    display: inline-block;
+}
+
+#webcam {
+    display: block;
+}
+
+.switch-camera-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.switch-camera-button img {
+    width: 24px;
+    height: 24px;
+}
+
 .disabled {
     pointer-events: none;
     opacity: 0.5;
