@@ -9,7 +9,7 @@ async function initializeWebcam(facingMode) {
   try {
     if (webcam) {
       await webcam.stop();
-      webcamElement.parentNode.removeChild(webcamElement);
+      webcamElement.remove();
       webcamElement = document.createElement('video');
       webcamElement.setAttribute('id', 'webcam');
       webcamElement.setAttribute('autoplay', 'true');
@@ -32,6 +32,7 @@ async function setup() {
     captureButton.classList.remove('disabled');
     captureButton.removeAttribute('disabled');
     captureButton.textContent = "Capture Photo";
+    console.log("Model loaded successfully");
   } catch (error) {
     console.error("Failed to load model:", error);
   }
@@ -49,6 +50,8 @@ async function captureAndClassify() {
     return;
   }
 
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
   let canvas = document.createElement('canvas');
   let context = canvas.getContext('2d');
   canvas.width = video.videoWidth;
@@ -59,7 +62,8 @@ async function captureAndClassify() {
     let predictions = await model.detect(canvas);
 
     if (predictions.length === 0) {
-      throw new Error("No objects detected.");
+      alert("No objects detected.");
+      return;
     }
 
     let highestConfidenceResult = predictions.reduce((prev, current) => {
@@ -90,6 +94,7 @@ async function captureAndClassify() {
 
     let capturedImageContainer = document.getElementById('capturedImage');
     capturedImageContainer.appendChild(cardDiv);
+
   } catch (error) {
     console.error("Error processing image:", error);
     alert("Error processing image: " + error.message);
