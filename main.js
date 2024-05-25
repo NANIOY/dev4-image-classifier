@@ -1,5 +1,7 @@
 let webcamElement = document.getElementById('webcam');
 let captureButton = document.querySelector('.captureButton');
+let switchCameraButton = document.getElementById('switchCameraButton');
+let facingMode = 'user';
 let webcam = new Webcam(webcamElement, 'user');
 let classifier;
 
@@ -87,3 +89,10 @@ async function captureAndClassify() {
 }
 
 captureButton.addEventListener('click', captureAndClassify);
+
+switchCameraButton.addEventListener('click', () => {
+  facingMode = (facingMode === 'user') ? 'environment' : 'user';
+  webcam.stop();
+  webcam = new Webcam(webcamElement, facingMode);
+  webcam.start();
+});
