@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.19.0",
     "webcam-easy": "^1.1.1"
   }
 }

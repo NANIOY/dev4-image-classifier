@@ -1,15 +1,12 @@
-const webcamElement = document.getElementById('webcam');
-const canvasElement = document.getElementById('canvas');
-const snapSoundElement = document.getElementById('snapSound');
-const captureButton = document.querySelector('.captureButton');
-const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
+let webcamElement = document.getElementById('webcam');
+let captureButton = document.querySelector('.captureButton');
+let webcam = new Webcam(webcamElement, 'user');
 let classifier;
 
-// setup
 async function setup() {
   try {
-    // load the model
-    classifier = await ml5.imageClassifier('MobileNet');
+    // load mobilenet model
+    classifier = await mobilenet.load();
 
     // enable capture button
     captureButton.classList.remove('disabled');
@@ -23,7 +20,6 @@ async function setup() {
 captureButton.classList.add('disabled');
 captureButton.textContent = "Model loading...";
 
-// start webcam
 webcam.start()
   .then(result => {
     console.log("Webcam started:", result);
@@ -31,70 +27,60 @@ webcam.start()
   })
   .catch(err => console.error("Webcam start error:", err));
 
-// capture photo and classify
+// capture and classify image
 async function captureAndClassify() {
-  // check if video stream is available
-  const video = webcamElement;
+  let video = webcamElement;
   if (!video.srcObject) {
     console.error("No video stream available.");
     return;
   }
 
-  // capture picture
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
+  // capture image from webcam
+  let canvas = document.createElement('canvas');
+  let context = canvas.getContext('2d');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
-  context.scale(-1, 1); // flip horizontally
-  context.drawImage(video, 0, 0, canvas.width * -1, canvas.height);
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   try {
-    // convert to blob
-    canvas.toBlob(async function (blob) {
-      if (!blob) {
-        console.error("Failed to capture image as blob.");
-        return;
-      }
+    // classify image using mobilenet model and get predictions
+    let predictions = await classifier.classify(canvas);
+    let highestConfidenceResult = predictions.reduce((prev, current) => {
+      return (prev.probability > current.probability) ? prev : current;
+    });
 
-      // create image element
-      const imageURL = URL.createObjectURL(blob);
-      const imgElement = document.createElement('img');
-      imgElement.src = imageURL;
+    // trim down result to remove extra information
+    let trimmedResult = highestConfidenceResult.className.split(',')[0].trim();
 
-      // create card
-      const cardDiv = document.createElement('div');
-      cardDiv.classList.add('card');
+    // create p element for displaying prediction result
+    let resultParagraph = document.createElement('p');
+    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.probability.toFixed(4)}`;
 
-      // create image container and add image
-      const imageContainer = document.createElement('div');
-      imageContainer.classList.add('image-container');
-      imageContainer.appendChild(imgElement);
+    // create image element for captured image
+    let imgElement = new Image();
+    imgElement.src = canvas.toDataURL('image/jpeg');
 
-      // create container for classification result
-      const resultContainer = document.createElement('div');
-      resultContainer.classList.add('result-container');
+    // create card element for captured image and result
+    let cardDiv = document.createElement('div');
+    cardDiv.classList.add('card');
 
-      // display only the highest confidence result
-      const results = await classifier.classify(canvas);
-      const highestConfidenceResult = results.reduce((prev, current) => {
-        return (prev.confidence > current.confidence) ? prev : current;
-      });
+    // create image container and result container
+    let imageContainer = document.createElement('div');
+    imageContainer.classList.add('image-container');
+    imageContainer.appendChild(imgElement);
 
-      // Trim down the result label
-      const trimmedResult = highestConfidenceResult.label.split(',')[0].trim();
+    // create result container
+    let resultContainer = document.createElement('div');
+    resultContainer.classList.add('result-container');
+    resultContainer.appendChild(resultParagraph);
 
-      // Create a paragraph element for the trimmed result
-      const resultParagraph = document.createElement('p');
-      resultParagraph.textContent = trimmedResult;
-      resultContainer.appendChild(resultParagraph);
+    // append image and result container to card
+    cardDiv.appendChild(imageContainer);
+    cardDiv.appendChild(resultContainer);
 
-      cardDiv.appendChild(imageContainer);
-      cardDiv.appendChild(resultContainer);
-
-      // append card to captured image container
-      const capturedImageContainer = document.getElementById('capturedImage');
-      capturedImageContainer.appendChild(cardDiv);
-    }, 'image/jpeg');
+    // append card to captured image container
+    let capturedImageContainer = document.getElementById('capturedImage');
+    capturedImageContainer.appendChild(cardDiv);
   } catch (error) {
     console.error("Error processing image:", error);
   }
