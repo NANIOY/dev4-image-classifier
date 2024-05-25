@@ -3,7 +3,7 @@ let captureButton = document.querySelector('.captureButton');
 let switchCameraButton = document.getElementById('switchCameraButton');
 let facingMode = 'user';
 let webcam;
-let classifier;
+let model;
 
 async function initializeWebcam(facingMode) {
   try {
@@ -20,8 +20,7 @@ async function initializeWebcam(facingMode) {
 
 async function setup() {
   try {
-    classifier = await mobilenet.load();
-
+    model = await cocoSsd.load();
     captureButton.classList.remove('disabled');
     captureButton.removeAttribute('disabled');
     captureButton.textContent = "Capture Photo";
@@ -49,15 +48,15 @@ async function captureAndClassify() {
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   try {
-    let predictions = await classifier.classify(canvas);
+    let predictions = await model.detect(canvas);
     let highestConfidenceResult = predictions.reduce((prev, current) => {
-      return (prev.probability > current.probability) ? prev : current;
+      return (prev.score > current.score) ? prev : current;
     });
 
-    let trimmedResult = highestConfidenceResult.className.split(',')[0].trim();
+    let trimmedResult = highestConfidenceResult.class;
 
     let resultParagraph = document.createElement('p');
-    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.probability.toFixed(4)}`;
+    resultParagraph.textContent = `Prediction: ${trimmedResult}, Probability: ${highestConfidenceResult.score.toFixed(4)}`;
 
     let imgElement = new Image();
     imgElement.src = canvas.toDataURL('image/jpeg');
