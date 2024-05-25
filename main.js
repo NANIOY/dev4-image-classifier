@@ -49,6 +49,11 @@ async function captureAndClassify() {
 
   try {
     let predictions = await model.detect(canvas);
+
+    if (predictions.length === 0) {
+      throw new Error("No objects detected.");
+    }
+
     let highestConfidenceResult = predictions.reduce((prev, current) => {
       return (prev.score > current.score) ? prev : current;
     });
@@ -79,6 +84,7 @@ async function captureAndClassify() {
     capturedImageContainer.appendChild(cardDiv);
   } catch (error) {
     console.error("Error processing image:", error);
+    alert("Error processing image: " + error.message);
   }
 }
 
