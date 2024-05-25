@@ -113,7 +113,7 @@ async function captureAndClassify() {
 
     // append card to captured image container
     let capturedImageContainer = document.getElementById('capturedImage');
-    capturedImageContainer.appendChild(cardDiv);
+    capturedImageContainer.insertBefore(cardDiv, capturedImageContainer.firstChild);
 
   } catch (error) {
     console.error("Error processing image:", error);
