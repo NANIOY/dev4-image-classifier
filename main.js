@@ -5,32 +5,34 @@ let facingMode = 'user';
 let webcam;
 let model;
 
-class Webcam {
-  constructor(webcamElement, facingMode) {
-    this.webcamElement = webcamElement;
-    this.facingMode = facingMode;
-    this.stream = null;
-  }
-
-  async start() {
-    const constraints = {
-      video: {
-        facingMode: this.facingMode
-      }
-    };
-    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.webcamElement.srcObject = this.stream;
-    return new Promise((resolve) => {
-      this.webcamElement.onloadedmetadata = () => {
-        resolve();
-      };
-    });
-  }
-
-  async stop() {
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
+if (typeof Webcam === 'undefined') {
+  class Webcam {
+    constructor(webcamElement, facingMode) {
+      this.webcamElement = webcamElement;
+      this.facingMode = facingMode;
       this.stream = null;
+    }
+
+    async start() {
+      const constraints = {
+        video: {
+          facingMode: this.facingMode
+        }
+      };
+      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.webcamElement.srcObject = this.stream;
+      return new Promise((resolve) => {
+        this.webcamElement.onloadedmetadata = () => {
+          resolve();
+        };
+      });
+    }
+
+    async stop() {
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.stream = null;
+      }
     }
   }
 }
