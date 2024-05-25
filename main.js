@@ -9,6 +9,14 @@ async function initializeWebcam(facingMode) {
   try {
     if (webcam) {
       await webcam.stop();
+      webcamElement.parentNode.removeChild(webcamElement);
+      webcamElement = document.createElement('video');
+      webcamElement.setAttribute('id', 'webcam');
+      webcamElement.setAttribute('autoplay', 'true');
+      webcamElement.setAttribute('playsinline', 'true');
+      webcamElement.setAttribute('width', '640');
+      webcamElement.setAttribute('height', '480');
+      document.body.insertBefore(webcamElement, document.body.childNodes[2]);
     }
     webcam = new Webcam(webcamElement, facingMode);
     await webcam.start();
